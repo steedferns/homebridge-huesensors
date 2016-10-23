@@ -1,0 +1,22 @@
+{
+  "name": "homebridge-huesensors",
+  "version": "0.0.1",
+  "description": "HueSensors for homebridge",
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "author": {
+    "name": "steedferns"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/steedferns/homebridge-huesensors"
+  },
+  "dependencies": {
+    "huejay": "1.4.2"
+  }
+}

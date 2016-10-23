@@ -1,0 +1,26 @@
+{
+    "bridge": {
+        "name": "Homebridge",
+        "username": "CD:33:3D:E3:CE:33",
+        "port": 51826,
+        "pin": "031-45-156"
+    },
+    "description": "for huesensors",
+    "platforms": [],
+    "accessories": [
+        {
+            "accessory": "HueSensors",
+            "name": "Hue Sensors",
+            "bridges": [
+                {
+                    "IP": "192.168.x.x",
+                    "username": "bridge username"
+                },
+                {
+                    "IP": "192.168.x.x",
+                    "username": "bridge username"
+                }
+            ]
+        }
+    ]
+}
