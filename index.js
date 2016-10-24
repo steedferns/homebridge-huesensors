@@ -13,11 +13,10 @@ module.exports = function (homebridge) {
 function HueSensorsAccessory(log, config) {
     this.log = log;
 
-
     this.clients = [];
     for (let bridge of config["bridges"]) {
 
-            var newBridge = new huejay.Client({
+        var newBridge = new huejay.Client({
             host: bridge.IP,
             port: 80,               // Optional
             username: bridge.username, // Optional
@@ -30,6 +29,29 @@ function HueSensorsAccessory(log, config) {
 }
 
 HueSensorsAccessory.prototype = {
+
+    setState: function (state) {
+        for (let client of this.clients) {
+            client.sensors.getAll()
+                .then(sensors => {
+                    for (let sensor of sensors) {
+
+                        if (sensor.type == "ZLLPresence") {
+
+                            sensor.config.on = state;
+                            client.sensors.save(sensor);
+
+                            this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
+
+                        }
+                    }
+
+                })
+                .catch(error => {
+                    console.log(error.stack);
+                });
+        }
+    },
 
     getPowerState: function (callback) {
 
@@ -71,57 +93,14 @@ HueSensorsAccessory.prototype = {
     setPowerState: function (powerOn, callback) {
         if (powerOn) {
 
-            for (let client of this.clients) {
-                client.sensors.getAll()
-                    .then(sensors => {
-                        for (let sensor of sensors) {
-
-                            if (sensor.type == "ZLLPresence") {
-
-                                sensor.config.on = true;
-                                client.sensors.save(sensor);
-
-                                this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
-
-                            }
-                        }
-
-                    })
-                    .catch(error => {
-                        console.log(error.stack);
-                    });
-            }
-
-            //done processing all bridges
+            //turn on
+            this.setState(true);
             callback();
 
         } else {
 
             //turn off
-
-            for (let client of this.clients) {
-
-                client.sensors.getAll()
-                    .then(sensors => {
-                        for (let sensor of sensors) {
-
-                            if (sensor.type == "ZLLPresence") {
-
-                                sensor.config.on = false;
-                                client.sensors.save(sensor);
-
-                                this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
-
-                            }
-                        }
-
-                    })
-                    .catch(error => {
-                        console.log(error.stack);
-                    });
-            }
-
-            //done processing all bridges
+            this.setState(false);
             callback();
         }
     },
