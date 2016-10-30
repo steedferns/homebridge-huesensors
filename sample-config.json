@@ -11,6 +11,10 @@
         {
             "accessory": "HueSensors",
             "name": "Hue Sensors",
+            "filter": [
+                "Kitchen sensor",
+                "Entrance sensor",
+            ],
             "bridges": [
                 {
                     "IP": "192.168.x.x",
