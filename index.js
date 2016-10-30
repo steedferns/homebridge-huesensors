@@ -12,18 +12,19 @@ module.exports = function (homebridge) {
 
 function HueSensorsAccessory(log, config) {
     this.log = log;
-
+    this.filter = config["filter"];
     this.clients = [];
     for (let bridge of config["bridges"]) {
 
         var newBridge = new huejay.Client({
             host: bridge.IP,
             port: 80,               // Optional
-            username: bridge.username, // Optional
+            username: bridge.username,
             timeout: 15000,            // Optional, timeout in milliseconds (15000 is the default)
         });
 
         this.clients.push(newBridge);
+
     }
 
 }
@@ -32,20 +33,24 @@ HueSensorsAccessory.prototype = {
 
     setState: function (state) {
         for (let client of this.clients) {
+
             client.sensors.getAll()
                 .then(sensors => {
                     for (let sensor of sensors) {
 
-                        if (sensor.type == "ZLLPresence") {
+                        //only check for sensors specified in the config
+                        if (this.filter.indexOf(sensor.name) > -1) {
 
-                            sensor.config.on = state;
-                            client.sensors.save(sensor);
+                            if (sensor.type == "ZLLPresence") {
 
-                            this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
+                                sensor.config.on = state;
+                                client.sensors.save(sensor);
 
+                                this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
+
+                            }
                         }
                     }
-
                 })
                 .catch(error => {
                     console.log(error.stack);
@@ -53,40 +58,79 @@ HueSensorsAccessory.prototype = {
         }
     },
 
-    getPowerState: function (callback) {
+    checkBridges: function (callback) {
 
-        var sensorsON = true;
+        var promises = [];
 
         for (let client of this.clients) {
 
-            client.sensors.getAll()
-                .then(sensors => {
-                    for (let sensor of sensors) {
+            promises.push(new Promise((resolve, reject) => {
 
-                        if (sensor.type == "ZLLPresence") {
+                var sensorsON = true;
 
-                            this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
+                client.sensors.getAll()
+                    .then(sensors => {
+                        for (let sensor of sensors) {
 
-                            //at least one sensor is off, so return off
-                            if (sensor.config.on == false) {
-                                sensorsON = false;
+                            //only check for sensors specified in the config
+                            if (this.filter.indexOf(sensor.name) > -1) {
+
+                                if (sensor.type == "ZLLPresence") {
+
+                                    this.log(`Sensor [${sensor.id}]: ${sensor.name} On: ${sensor.config.on}`);
+
+                                    //at least one sensor is off, so return off
+                                    if (sensor.config.on == false) {
+                                        sensorsON = false;
+                                        this.log("A sensor is OFF: " + sensor.name);
+                                    }
+
+                                }
                             }
-
                         }
-                    }
 
-                })
-                .catch(error => {
-                    console.log(error.stack);
-                });
+                        this.log("finished bridge: " + client.username);
+                        resolve(sensorsON);
+
+                    })
+                    .catch(error => {
+                        console.log(error.stack);
+                        reject(error.stack);
+                    });
+
+
+            }));
+
         }
 
-        if (sensorsON) {
-            callback(null, 1);
-        } else {
-            callback(null, 0);
-        }
+        Promise.all(promises).then(values => {
 
+            if (values.indexOf(false) > -1) {
+                callback(false);
+            } else {
+                callback(true);
+            }
+
+        })
+
+    },
+
+    getPowerState: function (callback) {
+
+
+        this.checkBridges(function (retval) {
+
+
+            if (retval) {
+                console.log("all on");
+                callback(null, 1);
+            } else {
+                console.log("at least one off");
+                callback(null, 0);
+            }
+
+
+        });
 
     },
 
