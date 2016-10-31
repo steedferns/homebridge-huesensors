@@ -89,7 +89,7 @@ HueSensorsAccessory.prototype = {
                             }
                         }
 
-                        this.log("finished bridge: " + client.username);
+                        //this.log("finished bridge: " + client.username);
                         resolve(sensorsON);
 
                     })
