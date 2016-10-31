@@ -13,7 +13,7 @@
             "name": "Hue Sensors",
             "filter": [
                 "Kitchen sensor",
-                "Entrance sensor",
+                "Entrance sensor"
             ],
             "bridges": [
                 {
