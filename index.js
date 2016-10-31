@@ -59,15 +59,14 @@ HueSensorsAccessory.prototype = {
     },
 
     checkBridges: function (callback) {
-
+        
         var promises = [];
-
+        
         for (let client of this.clients) {
 
             promises.push(new Promise((resolve, reject) => {
-
+                
                 var sensorsON = true;
-
                 client.sensors.getAll()
                     .then(sensors => {
                         for (let sensor of sensors) {
@@ -97,8 +96,7 @@ HueSensorsAccessory.prototype = {
                         console.log(error.stack);
                         reject(error.stack);
                     });
-
-
+                
             }));
 
         }
@@ -116,11 +114,7 @@ HueSensorsAccessory.prototype = {
     },
 
     getPowerState: function (callback) {
-
-
         this.checkBridges(function (retval) {
-
-
             if (retval) {
                 console.log("all on");
                 callback(null, 1);
@@ -128,21 +122,15 @@ HueSensorsAccessory.prototype = {
                 console.log("at least one off");
                 callback(null, 0);
             }
-
-
         });
-
     },
 
     setPowerState: function (powerOn, callback) {
         if (powerOn) {
-
             //turn on
             this.setState(true);
             callback();
-
         } else {
-
             //turn off
             this.setState(false);
             callback();
