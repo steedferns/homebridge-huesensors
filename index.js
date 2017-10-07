@@ -116,7 +116,6 @@ HueSensorsAccessory.prototype = {
     getPowerState: function (callback) {
         this.checkBridges(function (retval) {
             if (retval) {
-                console.log(retval);
                 console.log("all on");
                 callback(null, 1);
             } else {
