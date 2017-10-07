@@ -17,6 +17,6 @@
     "url": "git://github.com/steedferns/homebridge-huesensors"
   },
   "dependencies": {
-    "huejay": "1.4.2"
+    "huejay": ">=1.4.2"
   }
 }
